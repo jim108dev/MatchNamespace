@@ -31,13 +31,18 @@ module Main =
             | _ -> newHead :: x :: xs
         | [] -> newHead :: []
 
-    let replaceNamespaceInFile (filePath: string) (replacement: string) =
-        File.ReadAllLines filePath
-        |> Seq.toList
-        |> replaceNamespaceInText replacement
-        |> fun contents -> File.WriteAllLines(filePath, contents)
+    let replaceNamespaceInFile (doNothing:bool) (filePath: string) (replacement: string) =
+        printfn $"Replace namespace in {filePath} by {replacement}"
 
-    let replaceNamespacesInDirectory (prefix: Option<string>) (root: string) =
+        if doNothing then
+            ()
+        else
+            File.ReadAllLines filePath
+            |> Seq.toList
+            |> replaceNamespaceInText replacement
+            |> fun contents -> File.WriteAllLines(filePath, contents)
+
+    let replaceNamespacesInDirectory (doNothing:bool) (prefix: Option<string>) (root: string) =
         Directory.EnumerateFiles(root, "*.fs", SearchOption.AllDirectories)
         |> Seq.iter (fun filePath ->
             let relativePath = Path.GetRelativePath(root, filePath)
@@ -49,23 +54,23 @@ module Main =
                 | Some p, n -> (String.concat "." [| p; n |])
                 | None, n -> n
 
-            replaceNamespaceInFile filePath newNamespace)
+            replaceNamespaceInFile doNothing filePath newNamespace)
 
     [<EntryPoint>]
     let main args =
         let arguments = A.parser.Parse args
-        let prefix = arguments.TryGetResult Argument.Prefix
-        let maybeRoot = arguments.TryGetResult Argument.Root
+        let doNothing = arguments.Contains A.Nothing
+        let prefix = arguments.TryGetResult A.Prefix
+        let maybeRoot = arguments.TryGetResult A.Root
+    
 
         match maybeRoot with
         | Some root ->
-            match Directory.Exists root with
-            | false ->
-                printfn $"Directory {root} not found."
-                -1
-            | true ->
-                replaceNamespacesInDirectory prefix root
-                0
+            if not (Directory.Exists root) then
+                let fullPath = Path.GetFullPath root
+                printfn $"Directory {fullPath} not found."; -1
+            else
+                replaceNamespacesInDirectory doNothing prefix root; 0
         | _ ->
             A.printUsage A.parser
             -1

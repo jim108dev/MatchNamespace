@@ -6,12 +6,14 @@ module Argument =
     open System
 
     type CliArguments =
+        | [<AltCommandLine("-n")>] Nothing
         | [<Unique;AltCommandLine("-p")>] Prefix of path:string
-        | [<MainCommand; ExactlyOnce; Last>] Root of path:string
+        | [<MainCommand; ExactlyOnce>] Root of path:string
 
         interface IArgParserTemplate with
             member s.Usage =
                 match s with
+                | Nothing -> "Just print the results but do not alter file contents."
                 | Prefix _ -> "Specify a namespace prefix."
                 | Root _ -> "Specify a the root directory."
 
