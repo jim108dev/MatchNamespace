@@ -1,6 +1,6 @@
 # MatchNamespace
 
-```sh
+```txt
 USAGE: MatchNamespace [--help] [--nothing] [--prefix <path>] <path>
 
 ROOT:
