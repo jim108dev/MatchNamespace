@@ -68,6 +68,7 @@ module Main =
                 line
             else
                 $"module {moduleReplacement} ="
+
         let contents =
             File.ReadAllLines filePath
             |> Seq.toList
@@ -83,7 +84,9 @@ module Main =
         |> Seq.iter (fun filePath ->
             let relativePath = Path.GetRelativePath(root, filePath)
             let namespaceFromPath = getNamespaceFromPath relativePath
-            let newModule = Path.GetFileNameWithoutExtension filePath
+
+            let newModule =
+                Path.GetFileNameWithoutExtension filePath
 
             let newNamespace =
                 match prefix, namespaceFromPath with
