@@ -68,11 +68,15 @@ module Main =
                 line
             else
                 $"module {moduleReplacement} ="
+        let contents =
+            File.ReadAllLines filePath
+            |> Seq.toList
+            |> replaceNamespaceModuleInText MAX_DEPTH namespaceReplacer moduleReplacer
 
-        File.ReadAllLines filePath
-        |> Seq.toList
-        |> replaceNamespaceModuleInText MAX_DEPTH namespaceReplacer moduleReplacer
-        |> fun contents -> File.WriteAllLines(filePath, contents)
+        if doNothing then
+            ()
+        else
+            File.WriteAllLines(filePath, contents)
 
     let replaceNamespacesInDirectory (doNothing: bool) (prefix: Option<string>) (root: string) =
         Directory.EnumerateFiles(root, "*.fs", SearchOption.AllDirectories)
